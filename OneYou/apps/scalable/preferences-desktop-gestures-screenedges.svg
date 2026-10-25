@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g transform="matrix(0.88192708,0,0,0.88192708,1.4110834,1.4110834)" id="g3" style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-width:0.389438;stroke-dasharray:none;stroke-opacity:0.3" class="ColorScheme-Text">
+    <path style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-width:0.389438;stroke-dasharray:none;stroke-opacity:0.3" class="ColorScheme-Text" d="m 12,9 v 3 H 9 v 2 h 4 c 1,0 1,-1 1,-1 V 9 Z M 2,9 v 4 c 0,0 0,1 1,1 H 7 V 12 H 4 V 9 Z M 9,2 v 2 h 3 v 3 h 2 V 3 C 14,3 14,2 13,2 Z M 3,2 C 2,2 2,3 2,3 V 7 H 4 V 4 H 7 V 2 Z" id="path1-8"/>
+  </g>
+  </g>
+</svg>

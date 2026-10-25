@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <path fill="#7dd3fc" fill-rule="evenodd" d="M101,130L100,133L97,137L142,137L142,129ZM106,54L104,57L99,64L89,78L73,102L67,109L55,127L50,133L48,137L85,137L88,133L89,130L95,123L106,106L118,89L124,82L136,64L141,58L143,54ZM49,54L49,62L90,61L90,60L94,54Z"/>
+</svg>

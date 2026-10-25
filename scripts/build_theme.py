@@ -3,12 +3,15 @@
 OneYou Icon Theme Builder
 =========================
 Builds a Material You / Android 16 style monochrome circular icon pack for Linux
-using a strict priority pipeline:
+using a strict 5-stage priority pipeline:
 
   Priority 1: Craft App Suite (`sources/craft/*.svg`) — Bicolor Woodcut / Engraving style
-  Priority 2: YAMIS (`~/.local/share/icons/YAMIS`)    — Filled monochrome silhouettes (preferred over stroke-only)
+  Priority 2: YAMIS (`~/.local/share/icons/YAMIS`)    — Filled monochrome silhouettes (apps + preferences)
   Priority 3: Lawnicons (`svgs/*.svg` + `appfilter.xml`) — 10,200+ Android 16 icons for remaining apps
-  Priority 4: Linux Freedesktop aliases (Papirus symlink map + Flatpak/AppImage/Waydroid aliases)
+  Priority 4: Linux Freedesktop Aliases (Papirus symlink map + .desktop Name/WMClass resolution)
+  Priority 5: Auto-Silhouette Extractor (`sources/auto/*.svg`) — Automatically strips square/cut-corner/squircle
+              plates from any remaining unmapped system icons (e.g. Quickshell, OpenTabletDriver, Qt tools,
+              AppImages) and vectorizes their inner logo into a uniform circular OneYou icon.
 
 Key colors (`PLATE_HEX` and `GLYPH_HEX`) are calibrated for 100% native compatibility
 with Quickshell `ii`'s `recolor_icons.py` (`ToneMap` classifies every app icon as a
@@ -17,6 +20,7 @@ non-inverted `plate` at tone 30.0 with a primary-tinted glyph at tone 92.0).
 import argparse
 import configparser
 import glob
+import io
 import os
 import re
 import shutil
@@ -24,6 +28,10 @@ import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+import cv2
+import numpy as np
+from PIL import Image
 
 # Calibrated Material You base tones for Quickshell `ii` (`recolor_icons.py`):
 # - PLATE_HEX has L* ~ 15 (dark container -> mapped to ToneMap.PLATE_TONE = 30.0)
@@ -33,6 +41,7 @@ GLYPH_HEX = "#7dd3fc"
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CRAFT_DIR = REPO_ROOT / "sources" / "craft"
+DEFAULT_AUTO_DIR = REPO_ROOT / "sources" / "auto"
 DEFAULT_YAMIS_DIR = Path(os.path.expanduser("~/.local/share/icons/YAMIS"))
 DEFAULT_PAPIRUS_DIR = Path("/usr/share/icons/Papirus/64x64/apps")
 DEFAULT_OUT_DIR = REPO_ROOT / "OneYou"
@@ -145,6 +154,112 @@ def convert_lawnicon_svg(svg_path: Path) -> str:
     return wrap_in_plate(body, "translate(42, 42) scale(0.5625)")
 
 
+def load_any_icon_rgba(path: str, size: int = 256) -> Image.Image:
+    """Render SVG or raster icon to a centered RGBA PIL image."""
+    with open(path, "rb") as f:
+        head = f.read(1024)
+    if path.lower().endswith(".svg") or b"<svg" in head.lower():
+        res = subprocess.run(["resvg", "-w", str(size), "-h", str(size), path, "-c"], capture_output=True)
+        if res.returncode == 0 and res.stdout:
+            return Image.open(io.BytesIO(res.stdout)).convert("RGBA")
+    im = Image.open(path).convert("RGBA")
+    im.thumbnail((size, size), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    canvas.paste(im, ((size - im.width) // 2, (size - im.height) // 2))
+    return canvas
+
+
+def auto_extract_silhouette_svg(path: str) -> str:
+    """
+    Automatically strip any non-circular plate (square, squircle, cut-corner Qt tile,
+    two-tone diagonal split, etc.) and vectorize the inner foreground glyph into a
+    circular OneYou SVG.
+    """
+    try:
+        im = load_any_icon_rgba(path, 256)
+    except Exception:
+        return ""
+    arr = np.array(im)
+    alpha = arr[..., 3]
+    vis = alpha > 40
+    if vis.sum() < 32:
+        return ""
+
+    lab = cv2.cvtColor(arr[..., :3], cv2.COLOR_RGB2Lab).astype(np.float32)
+    ys, xs = np.where(vis)
+    y0, y1, x0, x1 = ys.min(), ys.max(), xs.min(), xs.max()
+    bbox_vis = vis[y0 : y1 + 1, x0 : x1 + 1]
+    coverage = bbox_vis.mean()
+
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    eroded = cv2.erode(vis.astype(np.uint8), kernel) > 0
+    ring = vis & (~eroded)
+
+    mask = None
+    if coverage > 0.55 and ring.sum() > 20:
+        ring_pts = lab[ring]
+        step = max(1, len(ring_pts) // 48)
+        palette_ring = ring_pts[::step]
+        dists = np.linalg.norm(lab[:, :, None, :] - palette_ring[None, None, :, :], axis=-1).min(axis=-1)
+        fg_mask = eroded & (dists > 22.0)
+        fg_ratio = fg_mask.sum() / max(1, vis.sum())
+        if 0.02 <= fg_ratio <= 0.75:
+            fg_L = lab[..., 0][fg_mask]
+            if fg_L.std() > 25.0:
+                med_ring_L = np.median(ring_pts[:, 0])
+                if np.median(fg_L) > med_ring_L:
+                    thresh = np.percentile(fg_L, 25)
+                    fg_mask = fg_mask & (lab[..., 0] >= thresh)
+                else:
+                    thresh = np.percentile(fg_L, 75)
+                    fg_mask = fg_mask & (lab[..., 0] <= thresh)
+            mask = (fg_mask.astype(np.uint8)) * 255
+
+    if mask is None or (mask > 127).sum() < 30:
+        vis_L = lab[..., 0][vis].astype(np.uint8)
+        if vis_L.std() > 22.0:
+            t_val, _ = cv2.threshold(vis_L, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            bright = vis & (lab[..., 0] >= t_val)
+            dark = vis & (lab[..., 0] < t_val)
+            chosen = bright if bright.sum() >= dark.sum() * 0.6 else dark
+            mask = (chosen.astype(np.uint8)) * 255
+        else:
+            mask = (vis.astype(np.uint8)) * 255
+
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
+    mys, mxs = np.where(mask > 127)
+    if len(mys) < 10:
+        return ""
+    my0, my1, mx0, mx1 = mys.min(), mys.max(), mxs.min(), mxs.max()
+    crop = mask[my0 : my1 + 1, mx0 : mx1 + 1]
+    ch, cw = crop.shape
+    target = 96.0
+    scale = target / max(ch, cw)
+    nw, nh = max(1, int(round(cw * scale))), max(1, int(round(ch * scale)))
+    resized = cv2.resize(crop, (nw, nh), interpolation=cv2.INTER_AREA)
+    canvas192 = np.zeros((192, 192), dtype=np.uint8)
+    ox, oy = (192 - nw) // 2, (192 - nh) // 2
+    canvas192[oy : oy + nh, ox : ox + nw] = (resized > 110).astype(np.uint8) * 255
+
+    contours, _ = cv2.findContours(canvas192, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_TC89_KCOS)
+    parts = []
+    for c in contours:
+        if cv2.contourArea(c) < 3:
+            continue
+        pts = c.reshape(-1, 2)
+        parts.append("M" + "L".join(f"{x},{y}" for x, y in pts) + "Z")
+    if not parts:
+        return ""
+    d_str = "".join(parts)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">\n'
+        f'  <circle cx="96" cy="96" r="88" fill="{PLATE_HEX}"/>\n'
+        f'  <path fill="{GLYPH_HEX}" fill-rule="evenodd" d="{d_str}"/>\n'
+        "</svg>\n"
+    )
+
+
 def safe_symlink(target_name: str, link_path: Path) -> bool:
     """Create a relative symlink in the same folder if `link_path` does not exist yet."""
     if os.path.lexists(link_path) or link_path.name == target_name:
@@ -156,7 +271,7 @@ def safe_symlink(target_name: str, link_path: Path) -> bool:
         return False
 
 
-# Extra high-value Linux desktop aliases (AppImages, IDEs, Flatpaks, Waydroid, etc.)
+# High-value Linux desktop aliases (AppImages, IDEs, Flatpaks, Qt tools, Waydroid, etc.)
 EXTRA_LINUX_ALIASES = {
     "antigravity-ide": "antigravity",
     "google-antigravity": "antigravity",
@@ -164,14 +279,18 @@ EXTRA_LINUX_ALIASES = {
     "photoshop": "adobe-photoshop",
     "photoshop-cc": "adobe-photoshop",
     "jetbrains-studio": "android-studio",
-    "jetbrains-idea": "intellij",
+    "jetbrains-idea": "intellij-idea",
     "prism_launcher": "prismlauncher",
     "org.prismlauncher.prismlauncher": "prismlauncher",
     "org.kde.konsole": "konsole",
     "org.gnome.ptyxis": "utilities-terminal",
     "org.dosbox-staging.dosbox-staging": "dosbox",
-    "designer-qt6": "qtcreator",
-    "linguist-qt6": "qt",
+    "linguist-qt6": "linguist",
+    "designer-qt6": "QtProject-designer",
+    "assistant-qt6": "QtProject-assistant",
+    "qdbusviewer-qt6": "QtProject-qdbusviewer",
+    "java-25-openjdk": "java-21-openjdk",
+    "droidcam-icon": "droidcam",
     "regedit": "wine",
     "winefile": "wine",
     "winemine": "wine",
@@ -183,17 +302,113 @@ EXTRA_LINUX_ALIASES = {
 }
 
 
-def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None, papirus_dir: Path):
+_IMAGE_EXTS = {".svg", ".png", ".xpm", ".jpg", ".jpeg", ".bmp", ".gif"}
+
+
+def strip_image_ext(name: str) -> str:
+    """Strip image extension only, preserving reverse-domain IDs like org.quickshell."""
+    stem, ext = os.path.splitext(name)
+    return stem if ext.lower() in _IMAGE_EXTS else name
+
+
+def _find_system_icon_sources() -> list[tuple[str, str]]:
+    """Use the same icon discovery rules as `recolor_icons.py` to locate unmapped .desktop icons."""
+    desktop_dirs = [
+        "/usr/share/applications",
+        "/usr/local/share/applications",
+        os.path.expanduser("~/.local/share/applications"),
+        "/var/lib/flatpak/exports/share/applications",
+        os.path.expanduser("~/.local/share/flatpak/exports/share/applications"),
+        "/var/lib/snapd/desktop/applications",
+    ]
+    icon_roots = [
+        os.path.expanduser("~/.local/share/icons/hicolor"),
+        "/var/lib/flatpak/exports/share/icons/hicolor",
+        os.path.expanduser("~/.local/share/flatpak/exports/share/icons/hicolor"),
+        "/usr/share/icons/hicolor",
+        "/usr/share/icons/Papirus",
+        "/usr/share/icons/breeze",
+        os.path.expanduser("~/.local/share/icons/WhiteSur"),
+        os.path.expanduser("~/.local/share/icons/kora"),
+        os.path.expanduser("~/.icons/Deepin2022"),
+    ]
+    pixmap_dirs = ["/usr/share/pixmaps", "/usr/local/share/pixmaps", "/usr/share/icons"]
+
+    icon_index = {}
+    for priority_idx, root in enumerate(icon_roots):
+        if not os.path.isdir(root):
+            continue
+        base_bonus = (len(icon_roots) - priority_idx) * 10000
+        for r, _, files in os.walk(root):
+            if "apps" not in r.lower():
+                continue
+            rank = base_bonus + (1000 if "scalable" in r.lower() else (512 if "512" in r else (256 if "256" in r else 128)))
+            for f in files:
+                if f.lower().endswith((".svg", ".png")):
+                    stem = strip_image_ext(f).lower()
+                    if stem not in icon_index or rank > icon_index[stem][1]:
+                        icon_index[stem] = (os.path.join(r, f), rank)
+
+    for pd in pixmap_dirs:
+        if not os.path.isdir(pd):
+            continue
+        for f in os.listdir(pd):
+            p = os.path.join(pd, f)
+            if os.path.isfile(p) and f.lower().endswith((".svg", ".png")):
+                stem = strip_image_ext(f).lower()
+                if stem not in icon_index:
+                    icon_index[stem] = (p, 10)
+
+    out = []
+    for d in desktop_dirs:
+        if not os.path.isdir(d):
+            continue
+        for df in sorted(glob.glob(os.path.join(d, "*.desktop"))):
+            cp = configparser.ConfigParser(interpolation=None, strict=False)
+            try:
+                cp.read(df)
+                ic = cp.get("Desktop Entry", "Icon", fallback="").strip()
+            except Exception:
+                continue
+            if not ic:
+                continue
+            if ic.startswith("/"):
+                df_stem = os.path.splitext(os.path.basename(df))[0]
+                ic_stem = strip_image_ext(os.path.basename(ic))
+                src = ic if os.path.isfile(ic) else None
+                if not src:
+                    for ext in (".svg", ".png"):
+                        if os.path.isfile(ic + ext):
+                            src = ic + ext
+                            break
+                if src:
+                    out.append((df_stem, src))
+                    if ic_stem.lower() != df_stem.lower():
+                        out.append((ic_stem, src))
+            else:
+                ic_stem = strip_image_ext(os.path.basename(ic))
+                low_stem = ic_stem.lower()
+                for cand in (low_stem, low_stem.replace("_", "-"), low_stem.replace("-", "_"),
+                             low_stem.replace("_", "").replace("-", ""), low_stem.split(".")[-1]):
+                    hit = icon_index.get(cand)
+                    if hit:
+                        out.append((ic_stem, hit[0]))
+                        break
+    return out
+
+
+def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_dir: Path | None, papirus_dir: Path):
     if out_dir.exists():
         shutil.rmtree(out_dir)
     apps_out = out_dir / "apps" / "scalable"
     prefs_out = out_dir / "preferences" / "scalable"
     apps_out.mkdir(parents=True, exist_ok=True)
     prefs_out.mkdir(parents=True, exist_ok=True)
+    auto_dir.mkdir(parents=True, exist_ok=True)
 
     written_lower = {}  # lower_stem -> actual filename (e.g. "firefox.svg")
     written_exact = set()  # exact stem (case-sensitive)
-    counts = {"craft": 0, "yamis": 0, "lawnicons": 0, "symlinks": 0}
+    counts = {"craft": 0, "yamis": 0, "lawnicons": 0, "auto": 0, "symlinks": 0}
 
     def register(fname: str):
         stem = fname[:-4]
@@ -201,7 +416,6 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
         low = stem.lower()
         if low not in written_lower:
             written_lower[low] = fname
-        # Ensure lowercase symlink exists on case-sensitive Linux filesystems
         if f"{low}.svg" != fname and low not in written_exact:
             if safe_symlink(fname, apps_out / f"{low}.svg"):
                 written_exact.add(low)
@@ -216,7 +430,6 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
             register(dst_name)
             counts["craft"] += 1
 
-            # Create short-name aliases (e.g. ai.storyteller.photocraft.svg -> photocraft.svg)
             stem = src.stem
             if stem.startswith("ai.storyteller."):
                 short = stem.replace("ai.storyteller.", "")
@@ -225,57 +438,50 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
                         register(f"{alias}.svg")
                         counts["symlinks"] += 1
 
-    # ── Priority 2: YAMIS (Filled Monochrome Silhouettes) ────────────────────
-    yamis_apps = yamis_dir / "apps" / "scalable"
-    if yamis_apps.is_dir():
-        # First pass: real SVG files
-        for entry in sorted(yamis_apps.iterdir()):
+    # ── Priority 2: YAMIS (Filled Monochrome Silhouettes: apps + preferences) ─
+    for yamis_sub, also_in_prefs in (("apps/scalable", False), ("preferences/scalable", True)):
+        src_folder = yamis_dir / yamis_sub
+        if not src_folder.is_dir():
+            continue
+        # Real SVG files
+        for entry in sorted(src_folder.iterdir()):
             if not entry.name.endswith(".svg") or entry.is_symlink():
                 continue
+            converted = None
+            try:
+                converted = convert_yamis_app_svg(entry)
+            except Exception:
+                continue
+            if also_in_prefs:
+                (prefs_out / entry.name).write_text(converted, encoding="utf-8")
             if entry.stem.lower() in written_lower:
                 if entry.stem not in written_exact:
                     if safe_symlink(written_lower[entry.stem.lower()], apps_out / entry.name):
                         register(entry.name)
                         counts["symlinks"] += 1
                 continue
-            try:
-                (apps_out / entry.name).write_text(convert_yamis_app_svg(entry), encoding="utf-8")
-                register(entry.name)
-                counts["yamis"] += 1
-            except Exception:
-                pass
+            (apps_out / entry.name).write_text(converted, encoding="utf-8")
+            register(entry.name)
+            counts["yamis"] += 1
 
-        # Second pass: YAMIS internal symlinks
-        for entry in sorted(yamis_apps.iterdir()):
+        # Symlinks
+        for entry in sorted(src_folder.iterdir()):
             if not entry.name.endswith(".svg") or not entry.is_symlink():
                 continue
+            target_name = os.path.basename(os.readlink(entry))
+            if also_in_prefs:
+                safe_symlink(target_name, prefs_out / entry.name)
             if entry.stem.lower() in written_lower:
                 if entry.stem not in written_exact:
                     if safe_symlink(written_lower[entry.stem.lower()], apps_out / entry.name):
                         register(entry.name)
                         counts["symlinks"] += 1
                 continue
-            target_name = os.path.basename(os.readlink(entry))
             target_stem = os.path.splitext(target_name)[0].lower()
             if target_stem in written_lower:
                 if safe_symlink(written_lower[target_stem], apps_out / entry.name):
                     register(entry.name)
                     counts["symlinks"] += 1
-
-    # Copy & wrap YAMIS preferences/scalable as plated icons too
-    yamis_prefs = yamis_dir / "preferences" / "scalable"
-    if yamis_prefs.is_dir():
-        for entry in sorted(yamis_prefs.iterdir()):
-            if not entry.name.endswith(".svg"):
-                continue
-            if entry.is_symlink():
-                target_name = os.path.basename(os.readlink(entry))
-                safe_symlink(target_name, prefs_out / entry.name)
-            else:
-                try:
-                    (prefs_out / entry.name).write_text(convert_yamis_app_svg(entry), encoding="utf-8")
-                except Exception:
-                    pass
 
     # Copy non-app YAMIS folders (places, status, actions, devices, categories, mimetypes, emblems)
     for sub in ("actions/16", "actions/scalable", "categories/scalable", "devices/scalable",
@@ -300,7 +506,6 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
             stem_lower = src.stem.lower()
             if stem_lower in written_lower:
                 continue
-            # Also check hyphenated equivalent (e.g. visual_studio_code -> visual-studio-code)
             hyphen_stem = stem_lower.replace("_", "-")
             try:
                 svg_text = convert_lawnicon_svg(src)
@@ -314,7 +519,6 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
             except Exception:
                 pass
 
-        # Parse Lawnicons appfilter.xml to map reverse-domain package IDs -> drawable
         appfilter = lawn_dir / "app" / "assets" / "appfilter.xml"
         if appfilter.is_file():
             try:
@@ -333,7 +537,7 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
             except Exception:
                 pass
 
-    # ── Priority 4: Linux Freedesktop Aliases (Papirus + Extra Aliases) ──────
+    # ── Priority 4: Linux Freedesktop Aliases (Papirus + .desktop Metadata) ──
     if papirus_dir.is_dir():
         for entry in sorted(os.listdir(papirus_dir)):
             if not entry.endswith(".svg"):
@@ -343,6 +547,10 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
                 continue
             alias_stem = entry[:-4].lower()
             if alias_stem in written_lower:
+                if entry[:-4] not in written_exact:
+                    if safe_symlink(written_lower[alias_stem], apps_out / entry):
+                        register(entry)
+                        counts["symlinks"] += 1
                 continue
             target_stem = os.path.splitext(os.path.basename(os.readlink(p)))[0].lower()
             for cand in (target_stem, target_stem.replace("-", "_"), target_stem.split(".")[-1]):
@@ -358,46 +566,111 @@ def build(out_dir: Path, craft_dir: Path, yamis_dir: Path, lawn_dir: Path | None
                 register(f"{alias_stem}.svg")
                 counts["symlinks"] += 1
 
-    # Also match dynamic hashed AppImage/JetBrains desktop icons on the system
-    for d in ("/usr/share/applications", os.path.expanduser("~/.local/share/applications")):
+    # Match .desktop Icon/Name/StartupWMClass (e.g. Steam games, JetBrains UUIDs, AppImages)
+    for d in ("/usr/share/applications", "/usr/local/share/applications",
+              os.path.expanduser("~/.local/share/applications"),
+              "/var/lib/flatpak/exports/share/applications",
+              os.path.expanduser("~/.local/share/flatpak/exports/share/applications")):
         if not os.path.isdir(d):
             continue
-        for df in glob.glob(os.path.join(d, "*.desktop")):
+        for df in sorted(glob.glob(os.path.join(d, "*.desktop"))):
             cp = configparser.ConfigParser(interpolation=None, strict=False)
             try:
                 cp.read(df)
                 ic = cp.get("Desktop Entry", "Icon", fallback="").strip()
+                app_name = cp.get("Desktop Entry", "Name", fallback="").strip()
+                wm_class = cp.get("Desktop Entry", "StartupWMClass", fallback="").strip()
             except Exception:
                 continue
             if not ic:
                 continue
             df_stem = os.path.splitext(os.path.basename(df))[0]
-            ic_stem = os.path.splitext(os.path.basename(ic))[0] if ic.startswith("/") else ic
+            ic_stem = strip_image_ext(os.path.basename(ic))
+            clean_name = re.sub(r"\s*\([^)]*\)|\s+\d+(?:\.\d+)*$|[™®]", "", app_name).strip().lower()
             for name in (df_stem, ic_stem):
                 low = name.lower()
                 if low in written_lower:
+                    if name not in written_exact:
+                        if safe_symlink(written_lower[low], apps_out / f"{name}.svg"):
+                            register(f"{name}.svg")
+                            counts["symlinks"] += 1
                     continue
-                # e.g. appimagekit_<hash>_org.prismlauncher.PrismLauncher or jetbrains-idea-<uuid>
                 tail = low.split("_")[-1] if low.startswith("appimagekit_") else low
                 if low.startswith("jetbrains-idea-"):
-                    tail = "intellij"
-                for cand in (tail, tail.replace("-", "_"), tail.split(".")[-1]):
-                    if cand in written_lower:
+                    tail = "intellij-idea"
+                cands = [
+                    tail,
+                    tail.replace("-", "_"),
+                    tail.replace("_", "-"),
+                    tail.replace("_", "").replace("-", ""),
+                    tail.split(".")[-1],
+                    clean_name.replace(" ", "_"),
+                    clean_name.replace(" ", "-"),
+                    clean_name.replace(" ", ""),
+                    wm_class.lower(),
+                    wm_class.lower().split(".")[-1],
+                ]
+                for cand in cands:
+                    if cand and cand in written_lower:
                         if safe_symlink(written_lower[cand], apps_out / f"{name}.svg"):
                             register(f"{name}.svg")
                             counts["symlinks"] += 1
                         break
 
-    # Write index.theme
+    # ── Priority 5: Auto-Silhouette Extractor (`sources/auto` + live scan) ───
+    def register_auto_aliases(dst_name: str):
+        stem = dst_name[:-4]
+        low = stem.lower()
+        short_cands = []
+        if low.startswith("appimagekit_") and "_" in low[12:]:
+            short_cands.append(low.split("_", 2)[2])
+        if "." in low:
+            tail = low.split(".")[-1]
+            short_cands.append(tail)
+            if tail.endswith("communityedition"):
+                short_cands.append(tail[:-16])
+        for sc in short_cands:
+            if sc and sc not in written_lower:
+                if safe_symlink(dst_name, apps_out / f"{sc}.svg"):
+                    register(f"{sc}.svg")
+                    counts["symlinks"] += 1
+
+    # First install any pre-extracted SVGs already stored in `sources/auto/`
+    for src in sorted(auto_dir.glob("*.svg")):
+        if src.stem.lower() not in written_lower:
+            shutil.copy2(src, apps_out / src.name)
+            register(src.name)
+            register_auto_aliases(src.name)
+            counts["auto"] += 1
+
+    # Then scan the system for any remaining .desktop icons and auto-extract their silhouette
+    for icon_name, src_path in _find_system_icon_sources():
+        low = icon_name.lower()
+        if low in written_lower:
+            if icon_name not in written_exact:
+                if safe_symlink(written_lower[low], apps_out / f"{icon_name}.svg"):
+                    register(f"{icon_name}.svg")
+                    counts["symlinks"] += 1
+            continue
+        svg_text = auto_extract_silhouette_svg(src_path)
+        if svg_text:
+            dst_name = f"{icon_name}.svg"
+            (auto_dir / dst_name).write_text(svg_text, encoding="utf-8")
+            (apps_out / dst_name).write_text(svg_text, encoding="utf-8")
+            register(dst_name)
+            register_auto_aliases(dst_name)
+            counts["auto"] += 1
+
     _write_index_theme(out_dir)
 
     print(
         f"Built OneYou theme at {out_dir}:\n"
-        f"  Priority 1 (*Craft Woodcut): {counts['craft']} icons\n"
-        f"  Priority 2 (YAMIS Filled)  : {counts['yamis']} icons\n"
-        f"  Priority 3 (Lawnicons)     : {counts['lawnicons']} icons\n"
-        f"  Priority 4 (Linux Symlinks): {counts['symlinks']} aliases\n"
-        f"  Total app entries          : {counts['craft'] + counts['yamis'] + counts['lawnicons'] + counts['symlinks']}"
+        f"  Priority 1 (*Craft Woodcut)  : {counts['craft']} icons\n"
+        f"  Priority 2 (YAMIS Filled)    : {counts['yamis']} icons\n"
+        f"  Priority 3 (Lawnicons)       : {counts['lawnicons']} icons\n"
+        f"  Priority 4 (Linux Symlinks)  : {counts['symlinks']} aliases\n"
+        f"  Priority 5 (Auto-Silhouette) : {counts['auto']} extracted icons\n"
+        f"  Total app entries            : {sum(counts.values())}"
     )
 
 
@@ -447,6 +720,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build the OneYou Material You icon theme.")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_DIR, help="Output theme directory")
     parser.add_argument("--craft-dir", type=Path, default=DEFAULT_CRAFT_DIR, help="Directory with *Craft SVGs")
+    parser.add_argument("--auto-dir", type=Path, default=DEFAULT_AUTO_DIR, help="Directory for auto-extracted SVGs")
     parser.add_argument("--yamis-dir", type=Path, default=DEFAULT_YAMIS_DIR, help="Path to YAMIS icon theme")
     parser.add_argument("--lawnicons-dir", type=Path, default=None, help="Path to Lawnicons repo (cloned on demand if omitted)")
     parser.add_argument("--papirus-dir", type=Path, default=DEFAULT_PAPIRUS_DIR, help="Path to Papirus 64x64/apps for Linux aliases")
@@ -466,7 +740,7 @@ if __name__ == "__main__":
         lawn_path = Path(tmp_lawn)
 
     try:
-        build(args.out, args.craft_dir, args.yamis_dir, lawn_path, args.papirus_dir)
+        build(args.out, args.craft_dir, args.auto_dir, args.yamis_dir, lawn_path, args.papirus_dir)
     finally:
         if tmp_lawn and os.path.isdir(tmp_lawn):
             shutil.rmtree(tmp_lawn, ignore_errors=True)

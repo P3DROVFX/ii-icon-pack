@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g id="g3" transform="matrix(0.15059155,0,0,0.15059155,-53.06091,-69.137694)">
+    <rect width="32.210213" x="373.43295" y="537.94153" rx="7.7597302e-05" height="11.712801" style="fill:#7dd3fc;stroke-width:2.9282;stroke-linejoin:round" id="rect4239" class="ColorScheme-Text"/>
+    <rect width="32.210304" x="411.49966" y="537.94153" rx="7.7597302e-05" height="11.712801" style="fill:#7dd3fc;stroke-width:2.9282;stroke-linejoin:round" id="rect4239-7" class="ColorScheme-Text"/>
+    <path style="fill:#7dd3fc;stroke-width:4.28717;stroke-linejoin:round" id="path4405" d="m 421.86164,481.00369 a 8.5743682,8.5743552 0 0 1 8.57434,8.57434 8.5743682,8.5743552 0 0 1 -6.43076,8.29806 v -4.59701 a 4.287184,4.2871776 0 0 0 2.14359,-3.70105 4.287184,4.2871776 0 0 0 -4.28717,-4.28716 4.287184,4.2871776 0 0 0 -4.2872,4.28716 4.287184,4.2871776 0 0 0 0.0428,0.57779 l -3.61734,2.81346 a 8.5743682,8.5743552 0 0 1 -0.71173,-3.39125 8.5743682,8.5743552 0 0 1 8.57437,-8.57434 z m 0,8.57434 -0.0257,41.80001 -12.83643,-17.14871 h -19.29236 l 32.15392,-24.6513 z" class="ColorScheme-Text"/>
+  </g>
+  </g>
+</svg>

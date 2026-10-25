@@ -9,7 +9,8 @@ A Material You / Android 16 monochrome circular icon pack for Linux desktops, de
 1. **Priority 1 — Craft App Suite (Woodcut Bicolor):** All 14 Storyteller `*Craft` applications (`ArtCraft Launcher`, `PhotoCraft`, `LightCraft`, `FigCraft`, `PdfCraft`, `VectorCraft`, `FilmCraft`, `EffectCraft`, `DesignCraft`, `WordCraft`, `DeckCraft`, `GridCraft`, `CADCraft`, `SoundCraft`) rendered in bicolor woodcut engraving style.
 2. **Priority 2 — YAMIS (Filled Silhouettes):** Desktop Linux applications, system preferences, folders, and status icons from *Yet Another Monochrome Icon Set*, using filled monochrome glyphs inside a uniform circular container.
 3. **Priority 3 — Lawnicons (Android 16):** Over 10,000 vector icons from Lawnicons to cover remaining applications, web apps, and games.
-4. **Priority 4 — Linux Freedesktop Aliases:** Over 20,000 symlink aliases covering Flatpak, Snap, AppImage, Steam, Waydroid, and standard `.desktop` reverse-domain identifiers.
+4. **Priority 4 — Linux Freedesktop & `.desktop` Aliases:** Over 21,000 symlink aliases covering Flatpak, Snap, AppImage, Steam, JetBrains IDEs, Qt tools, Waydroid, and standard `.desktop` `Icon=` / `Name=` / `StartupWMClass=` metadata.
+5. **Priority 5 — Auto-Silhouette Extractor (`sources/auto`):** Automatically strips non-circular background plates (squares, squircles, cut-corner Qt tiles like `org.quickshell`, two-tone diagonal plates like `linguist-qt6`, `otd`, `awcc`, etc.) from any remaining unmapped system icons and vectorizes their foreground logo into a clean monochrome circular `OneYou` icon.
 
 ---
 
@@ -80,3 +81,4 @@ python3 scripts/build_theme.py
 ## License
 
 Released under the [GNU General Public License v3.0](LICENSE).
+
