@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OneYou Icon Theme Builder
+ii-icon-pack Icon Theme Builder
 =========================
 Builds a Material You / Android 16 style monochrome circular icon pack for Linux
 using a strict 5-stage priority pipeline:
@@ -11,7 +11,7 @@ using a strict 5-stage priority pipeline:
   Priority 4: Linux Freedesktop Aliases (Papirus symlink map + .desktop Name/WMClass resolution)
   Priority 5: Auto-Silhouette Extractor (`sources/auto/*.svg`) — Automatically strips square/cut-corner/squircle
               plates from any remaining unmapped system icons (e.g. Quickshell, OpenTabletDriver, Qt tools,
-              AppImages) and vectorizes their inner logo into a uniform circular OneYou icon.
+              AppImages) and vectorizes their inner logo into a uniform circular ii-icon-pack icon.
 
 Key colors (`PLATE_HEX` and `GLYPH_HEX`) are calibrated for 100% native compatibility
 with Quickshell `ii`'s `recolor_icons.py` (`ToneMap` classifies every app icon as a
@@ -45,7 +45,7 @@ DEFAULT_AUTO_DIR = REPO_ROOT / "sources" / "auto"
 DEFAULT_YAMIS_DIR = Path(os.path.expanduser("~/.local/share/icons/YAMIS"))
 DEFAULT_MACTAHOE_DIR = Path(os.path.expanduser("~/.local/share/icons/MacTahoe-dark"))
 DEFAULT_PAPIRUS_DIR = Path("/usr/share/icons/Papirus/64x64/apps")
-DEFAULT_OUT_DIR = REPO_ROOT / "OneYou"
+DEFAULT_OUT_DIR = REPO_ROOT / "ii-icon-pack"
 
 
 def wrap_in_plate(inner_svg_body: str, transform: str, clip: bool = False) -> str:
@@ -260,7 +260,7 @@ def auto_extract_silhouette_svg(path: str) -> str:
     """
     Automatically strip any non-circular plate (square, squircle, cut-corner Qt tile,
     two-tone diagonal split, etc.) and vectorize the inner foreground glyph into a
-    circular OneYou SVG.
+    circular ii-icon-pack SVG.
     """
     try:
         im = load_any_icon_rgba(path, 256)
@@ -738,7 +738,7 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
     _write_index_theme(out_dir)
 
     print(
-        f"Built OneYou theme at {out_dir}:\n"
+        f"Built ii-icon-pack theme at {out_dir}:\n"
         f"  Priority 1 (*Craft Woodcut)  : {counts['craft']} icons\n"
         f"  Priority 2 (YAMIS Filled)    : {counts['yamis']} icons\n"
         f"  Priority 3 (Lawnicons)       : {counts['lawnicons']} icons\n"
@@ -780,7 +780,7 @@ def _write_index_theme(out_dir: Path):
 
     lines = [
         "[Icon Theme]",
-        "Name=OneYou",
+        "Name=ii-icon-pack",
         "Comment=Material You / Android 16 Monochrome Icon Pack (Craft + YAMIS + Lawnicons + MacTahoe)",
         "Inherits=MacTahoe-dark,MacTahoe,breeze-dark,Adwaita,hicolor",
         "DisplayDepth=32",
@@ -841,7 +841,7 @@ def _write_index_theme(out_dir: Path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Build the OneYou Material You icon theme.")
+    parser = argparse.ArgumentParser(description="Build the ii-icon-pack Material You icon theme.")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_DIR, help="Output theme directory")
     parser.add_argument("--craft-dir", type=Path, default=DEFAULT_CRAFT_DIR, help="Directory with *Craft SVGs")
     parser.add_argument("--auto-dir", type=Path, default=DEFAULT_AUTO_DIR, help="Directory for auto-extracted SVGs")
