@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g id="g16" style="fill:#7dd3fc" transform="matrix(0.60980206,0,0,0.60980206,-1.2907718,-0.63406398)" class="ColorScheme-Text">
+    <path d="m 13.047492,7.169976 7.753824,15.507648 3.876912,-7.753824 h -1.938456 l -0.484614,0.969228 H 19.347474 L 14.985948,7.169976 Z m 6.784596,9.69228 h 1.938456 l -0.969228,1.938456 z" id="path17" style="fill:#7dd3fc;stroke-width:0.899928" class="ColorScheme-Text"/>
+    <path d="M 11.200124,7.169976 7.3232113,14.9238 h 1.938456 l 0.484614,-0.969228 h 2.9076847 l 4.119219,8.238438 h 1.938456 z m 0,3.876912 0.969228,1.938456 h -1.938457 z" id="path18" style="fill:#7dd3fc;stroke-width:0.899928" class="ColorScheme-Text"/>
+    <path d="m 15.077036,18.800712 1.938456,3.876912 h 1.938456 l -1.938456,-3.876912 z" id="path19" style="fill:#7dd3fc;stroke-width:0.899928" class="ColorScheme-Text"/>
+  </g>
+  </g>
+</svg>

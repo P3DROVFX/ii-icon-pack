@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(42, 42) scale(0.5625)">
+    <path stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="10" d="m118 93 17-6m-64 46 12-15m14-41-1-18"/><circle cx="96" cy="42" r="17" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><circle cx="153" cy="82" r="17" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><circle cx="39" cy="82" r="17" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><circle cx="59" cy="148" r="17" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><circle cx="133" cy="148" r="17" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><circle cx="96" cy="100" r="22" stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><path stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="10" d="M144.913 132.992a59 59 0 0 0 10.064-31.345M75.82 44.558a59 59 0 0 0-26.565 19.443M37.009 101.03a59 59 0 0 0 9.735 31.448"/>
+  </g>
+</svg>

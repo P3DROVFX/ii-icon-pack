@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(1.5938)">
+    <path
+     id="path5"
+     d="M 40.83333,23.18069 H 23.16667 V 5.5 H 40.83333 Z M 23.16667,40.833333 H 5.5 V 23.166667 l 17.66667,0.01402 z M 58.5,23.18069 v 2.944812 C 58.5,46.736429 49.66313,58.49989 26.11258,58.5 H 23.16667 V 40.833333 h 2.94591 c 10.30221,-1.1e-4 14.72826,-4.409489 14.72826,-14.721854 l -0.008,-2.930789 z"
+     style="fill:#7dd3fc;fill-opacity:1;stroke-width:1.10417"
+     class="ColorScheme-Text" />
+  </g>
+</svg>

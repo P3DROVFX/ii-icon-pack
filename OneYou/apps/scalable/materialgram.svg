@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <path
+     id="path5"
+     style="fill:#7dd3fc;stroke-width:0.182112;paint-order:fill markers stroke"
+     d="M 8.4665,1.4551797 2.456797,15.47782 h 12.019406 z m 0,3.0959077 4.006468,9.6519476 H 9.559173 L 8.4665,9.8323417 7.373827,14.203035 H 4.460031 Z"
+     class="ColorScheme-Text" />
+  </g>
+</svg>

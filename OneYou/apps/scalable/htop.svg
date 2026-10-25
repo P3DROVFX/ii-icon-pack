@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g
+     id="g7"
+     transform="matrix(0.30484001,0,0,0.30484001,-1.2883803,-1.2883803)"
+     style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-opacity:1"
+     class="ColorScheme-Text">
+    <path
+       style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-opacity:1"
+       d="m 55,11 v 12 h -3 v -2 h 1 v -8 h -1 v -2 z m 0,15 v 12 h -3 v -2 h 1 v -8 h -1 v -2 z m 0,15 v 12 h -3 v -2 h 1 V 43 H 52 V 41 Z M 9,11 v 12 h 3 v -2 h -1 v -8 h 1 v -2 z m 0,15 v 12 h 3 v -2 h -1 v -8 h 1 v -2 z m 0,15 v 12 h 3 v -2 h -1 v -8 h 1 v -2 z"
+       id="path3-3"
+       class="ColorScheme-Text" />
+    <path
+       style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-opacity:1"
+       d="m 15,41 v 12 h 3 V 41 Z m 6,0 v 12 h 3 V 41 Z M 15,26 v 12 h 3 V 26 Z m 6,0 v 12 h 3 V 26 Z M 15,11 v 12 h 3 V 11 Z m 6,0 v 12 h 3 V 11 Z"
+       id="path4"
+       class="ColorScheme-Text" />
+    <path
+       style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-opacity:1"
+       d="m 27,26 v 12 h 3 V 26 Z m 7,0 v 12 h 3 V 26 Z"
+       id="path5"
+       class="ColorScheme-Text" />
+    <path
+       style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-opacity:1"
+       d="m 40,41 v 12 h 3 V 41 Z m 6,0 v 12 h 3 V 41 Z M 40,26 v 12 h 3 V 26 Z m 6,0 v 12 h 3 V 26 Z M 40,11 v 12 h 3 V 11 Z m 6,0 v 12 h 3 V 11 Z"
+       id="path6"
+       class="ColorScheme-Text" />
+  </g>
+  <g
+     aria-label="Terminal"
+     id="text2284"
+     style="font-size:1.76385px;opacity:1;fill:#999999;stroke-width:0.529156"
+     transform="matrix(0.9525522,0,0,0.9525522,0.05247431,0.0828432)" />
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.3750)">
+    <path d="M 8,1.5 C 4.4336667,1.5 1.5,4.4336667 1.5,8 c 0,3.566333 2.9336667,6.5 6.5,6.5 3.566333,0 6.5,-2.933667 6.5,-6.5 C 14.5,4.4336667 11.566333,1.5 8,1.5 Z m 0,1.2306667 c 2.890333,0 5.269333,2.379 5.269333,5.2693333 0,2.890333 -2.379,5.269333 -5.269333,5.269333 -2.8903333,0 -5.2693333,-2.379 -5.2693333,-5.269333 0,-2.8903333 2.379,-5.2693333 5.2693333,-5.2693333 z" fill="#7dd3fc" id="path99" style="stroke-width:1.08333" class="ColorScheme-Text"/>
+  <g transform="matrix(0.76470588,0,0,0.76470588,-0.41176468,-0.02941174)" id="g2" style="stroke:none;stroke-width:1.00038;stroke-dasharray:none;stroke-opacity:1">
+    <path style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-width:1.00038;stroke-dasharray:none;stroke-opacity:1" d="m 11,6 c -1.1045693,1.2e-6 -1.9999992,0.8954311 -2,2 v 2 H 7 v 5 h 8 V 10 H 13 V 8 c -10e-7,-1.1045689 -0.895431,-1.9999988 -2,-2 z m 0,1 c 0.552285,0 1,0.4477153 1,1 v 2 H 10 V 8 c 0,-0.5522847 0.447715,-1 1,-1 z m -3,4 h 1 1 2 1 1 v 3 H 8 Z" class="ColorScheme-Text" id="path1-3" sodipodi:nodetypes="ssccccccssssccssccccccccc"/>
+  </g>
+  </g>
+</svg>

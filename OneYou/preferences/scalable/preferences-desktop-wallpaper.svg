@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g id="g24" style="fill:#7dd3fc;fill-opacity:1" transform="matrix(0.33762641,0,0,0.33762641,-2.1931354,-2.7299874)" class="ColorScheme-Text">
+    <path style="fill:#7dd3fc;fill-opacity:1;stroke:none;stroke-width:1;stroke-dasharray:none;stroke-opacity:0.3" class="ColorScheme-Text" d="m 17.85855,19.44863 c -1.959104,0 -1.959104,1.959102 -1.959104,1.959102 v 19.59104 c 0,1.959104 1.959104,1.959104 1.959104,1.959104 h 9.79552 c 0,0 -1.959104,0 -1.959104,1.959104 v 1.959103 H 37.44959 V 44.91698 c 0,-1.959104 -1.959103,-1.959104 -1.959103,-1.959104 h 9.795518 c 1.959108,0 1.959108,-1.959104 1.959108,-1.959104 v -19.59104 c 0,0 0,-1.959102 -1.959108,-1.959102 z m 1.959104,3.918207 H 43.326905 V 39.039668 H 19.817654 Z" id="path5"/>
+    <g id="g7" transform="matrix(8.9121038,0,0,8.9121038,45.965162,-7.9136892)" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text">
+      <path id="rect3018-5" class="ColorScheme-Text" d="m -2.6457812,3.7040938 1.3228905,1.3228906 h -1.3228905 z" fill="#7dd3fc" style="fill:#7dd3fc;fill-opacity:1;stroke-width:0.264578"/>
+    </g>
+  </g>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(42, 42) scale(0.5625)">
+    <path stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12" d="M40.725 104.527a5.925 5.925 0 0 1 0-8.358l72.178-72.438a5.874 5.874 0 0 1 8.328 0l18.044 18.11a5.925 5.925 0 0 1 0 8.358l-64.9 65.135a5.88 5.88 0 0 1-4.165 1.731H55.656a5.88 5.88 0 0 1-4.164-1.731z"/><path stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12" d="M67.097 130.995a5.925 5.925 0 0 1 0-8.358l45.112-45.274a5.874 5.874 0 0 1 8.328 0l18.044 18.11a5.925 5.925 0 0 1 0 8.358l-37.834 37.97a5.88 5.88 0 0 1-4.164 1.731H82.029a5.88 5.88 0 0 1-4.164-1.731l-10.767-10.806Z"/><path stroke="#7dd3fc" stroke-linecap="round" stroke-linejoin="round" stroke-width="12" d="M93.47 157.463a5.926 5.926 0 0 1 0-8.359l18.045-18.109a5.874 5.874 0 0 1 8.328 0l18.044 18.109a5.926 5.926 0 0 1 0 8.359l-10.767 10.806a5.88 5.88 0 0 1-4.164 1.731h-14.554a5.88 5.88 0 0 1-4.164-1.731z"/>
+  </g>
+</svg>

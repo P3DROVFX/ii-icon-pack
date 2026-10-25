@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g id="g15" transform="matrix(0.88192708,0,0,0.88192708,-12.69975,-10.935896)">
+    <path d="M 27.936,23 A 2,2 0 0 1 28,23.5 V 24 a 2,2 0 0 1 -2,2 h -1 v 2 h 5 v -5 h -2 z" id="path13" style="fill:#7dd3fc" class="ColorScheme-Text"/>
+    <path d="m 25,23 v 2 h 1 a 1.007,1.007 0 0 0 0.295,-0.045 0.997,0.997 0 0 0 0.35,-0.19 1,1 0 0 0 0.246,-0.312 A 0.997,0.997 0 0 0 27,24 V 23.5 A 1,1 0 0 0 26.863,23 Z m -7,0 v 5 h 5 v -2 h -3 v -1 h 3 v -2 z m 0,-7 v 5 h 2.064 A 2,2 0 0 1 20,20.5 V 20 a 2,2 0 0 1 2,-2 h 1 v -2 z" id="path14" style="fill:#7dd3fc" class="ColorScheme-Text"/>
+    <path d="m 22,19 a 1.007,1.007 0 0 0 -0.295,0.045 0.997,0.997 0 0 0 -0.35,0.19 1,1 0 0 0 -0.246,0.312 A 0.997,0.997 0 0 0 21,20 v 0.5 A 1,1 0 0 0 21.137,21 H 23 v -2 z m 3,-3 v 2 h 3 v 1 h -3 v 2 h 5 v -5 z" id="path15" style="fill:#7dd3fc" class="ColorScheme-Text"/>
+  </g>
+  </g>
+</svg>

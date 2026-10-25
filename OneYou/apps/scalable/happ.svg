@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(42, 42) scale(0.5625)">
+    <path d="M43.162 78 53 22h32l-2.81 16h8l-7.028 40h24L117 22h32l-2.811 16h8l-13.351 76h8L139 170h-32l2.811-16h-8l7.027-40h-24L75 170H43l2.81-16h-8l13.352-76h-8Z" stroke="#7dd3fc" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M43.162 78 82.19 38m66.649 76-39.027 40m-72 0L154.189 38" stroke="#7dd3fc" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

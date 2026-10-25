@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" fill="none">
+  <circle cx="96" cy="96" r="88" fill="#1a2636"/>
+  <g transform="translate(45.00, 45.00) scale(6.0237)">
+    <g fill-rule="nonzero" id="g8" transform="matrix(0.39908274,0,0,0.39908274,-1.019469,-0.8103863)" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text">
+    <path d="M 32.813,25.313 H 15.187 c -0.621,0 -1.125,0.503 -1.125,1.125 v 12.205 c 0,0.621 0.504,1.125 1.125,1.125 h 17.626 c 0.621,0 1.124,-0.504 1.124,-1.125 V 26.437 c 0,-0.621 -0.503,-1.125 -1.125,-1.125 z" id="path3-3" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+    <path d="m 14.063,26.438 c -0.001,-0.622 0.503,-1.125 1.124,-1.125 h 17.626 c 0.621,0 1.124,0.503 1.124,1.125 v 2.444 H 14.062 v -2.444 z" id="path4" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+    <path d="M 24.75,7.688 H 7.125 C 6.504,7.688 6,8.191 6,8.813 V 21 c 0,0.621 0.504,1.125 1.125,1.125 H 24.75 c 0.621,0 1.125,-0.504 1.125,-1.125 V 8.812 c 0,-0.621 -0.504,-1.124 -1.125,-1.124 z" id="path5" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+    <path d="M 6,8.813 C 6,8.191 6.504,7.687 7.125,7.687 H 24.75 c 0.621,0 1.125,0.504 1.125,1.125 v 2.457 H 6 V 8.812 Z" id="path6" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+    <path d="M 41.063,10.5 H 30 c -0.414,0 -0.75,0.336 -0.75,0.75 v 7.5 c 0,0.414 0.336,0.75 0.75,0.75 h 11.063 c 0.414,0 0.749,-0.336 0.749,-0.75 v -7.5 c 0,-0.414 -0.335,-0.75 -0.75,-0.75 z" id="path7" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+    <path d="m 29.25,11.25 c 0,-0.414 0.336,-0.75 0.75,-0.75 h 11.063 c 0.414,0 0.749,0.336 0.749,0.75 v 1.5 H 29.25 Z" id="path8" style="fill:#7dd3fc;fill-opacity:1" class="ColorScheme-Text"/>
+  </g>
+  </g>
+</svg>
