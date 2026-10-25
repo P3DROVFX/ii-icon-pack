@@ -1,6 +1,8 @@
-# ii-icon-pack Icon Theme
+# ii-icon-pack
 
-A Material You / Android 16 monochrome circular icon pack for Linux desktops, designed for dynamic wallpaper-based recoloring and standalone dark/tinted setups.
+![ii-icon-pack Hero Banner](assets/hero-banner.jpg)
+
+A Material You / Android 16 monochrome circular icon pack for Linux desktops, designed for dynamic wallpaper-based recoloring in Quickshell (`ii`) and standalone dark/tinted setups.
 
 ## Icon Priority Architecture
 
@@ -22,7 +24,7 @@ A Material You / Android 16 monochrome circular icon pack for Linux desktops, de
 Clone this repository and copy (or symlink) the `ii-icon-pack` theme directory into your local icons folder:
 
 ```bash
-git clone https://github.com/<your-username>/ii-icon-pack.git ~/Downloads/ii-icon-pack
+git clone https://github.com/P3DROVFX/ii-icon-pack.git ~/Downloads/ii-icon-pack
 mkdir -p ~/.local/share/icons
 ln -sfn ~/Downloads/ii-icon-pack/ii-icon-pack ~/.local/share/icons/ii-icon-pack
 ```
