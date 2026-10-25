@@ -86,7 +86,33 @@ def convert_craft_woodcut_svg(svg_path: Path) -> str:
         body,
         flags=re.I,
     )
-    return wrap_in_plate(body.strip(), "translate(34.56, 34.56) scale(0.24)", clip=True)
+    wrapped = wrap_in_plate(body.strip(), "translate(34.56, 34.56) scale(0.24)", clip=True)
+    if len(body) <= 50000:
+        return wrapped
+
+    # QtSvg (QSvgRenderer, used by Quickshell) truncates single <path> elements that exceed
+    # its internal path-element complexity limit (~2,000 subpaths / >300KB in Storyteller's raw
+    # woodcut SVGs), which caused the dark woodcut grooves layer to be dropped in Qt apps.
+    # Simplify the composite woodcut into a single QtSvg-safe evenodd path (<37KB).
+    res = subprocess.run(["resvg", "-w", "512", "-h", "512", "-", "-c"], input=wrapped.encode(), capture_output=True)
+    if res.returncode != 0 or not res.stdout:
+        return wrapped
+    img = Image.open(io.BytesIO(res.stdout)).convert("RGBA")
+    arr = np.array(img)
+    fg = ((arr[:, :, 2] > 140) & (arr[:, :, 3] > 128)).astype(np.uint8) * 255
+    contours, _ = cv2.findContours(fg, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_TC89_KCOS)
+    parts = []
+    for c in contours:
+        if cv2.contourArea(c) < 2.5:
+            continue
+        approx = cv2.approxPolyDP(c, 0.4, True)
+        pts = approx.reshape(-1, 2)
+        if len(pts) >= 3:
+            parts.append("M" + "L".join(f"{x},{y}" for x, y in pts) + "Z")
+    if not parts:
+        return wrapped
+    d_str = "".join(parts)
+    return wrap_in_plate(f'<path fill="{GLYPH_HEX}" fill-rule="evenodd" d="{d_str}"/>', "scale(0.375)")
 
 
 def convert_yamis_app_svg(svg_path: Path) -> str:
