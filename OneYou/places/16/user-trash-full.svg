@@ -1,16 +1,6 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<svg xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" width="64" height="64" version="1.1" id="svg18" sodipodi:docname="user-trash-full.svg" inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)">
-  <metadata id="metadata22">
-    <rdf:RDF>
-      <cc:Work rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <sodipodi:namedview pagecolor="#9c4444" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="2560" inkscape:window-height="1376" id="namedview20" showgrid="false" inkscape:zoom="25.78125" inkscape:cx="7.4472727" inkscape:cy="7.990303" inkscape:window-x="0" inkscape:window-y="0" inkscape:window-maximized="1" inkscape:current-layer="svg18" inkscape:document-rotation="0" inkscape:showpageshadow="2" inkscape:pagecheckerboard="0" inkscape:deskcolor="#ffffff"/>
-  <defs id="defs14">
-    <style id="current-color-scheme" type="text/css">.ColorScheme-Text {color:#7dd3fc} .ColorScheme-Highlight {color:#3b4252}</style>
-  </defs>
-  <path style="fill:currentColor;stroke:none;stroke-width:2.85714;stroke-dasharray:none;stroke-opacity:0.3" class="ColorScheme-Text" d="m 27.714286,12 c -2.857143,0 -2.857143,2.857143 -2.857143,2.857143 h -8.571429 c 0,0 -2.857143,0 -2.857143,2.857143 v 2.857143 h 37.142858 v -2.857143 c 0,-2.857143 -2.857143,-2.857143 -2.857143,-2.857143 h -8.571429 c 0,0 0,-2.857143 -2.857143,-2.857143 z M 16.285714,23.428572 c 0,0 -2.857143,7.142857 -2.857143,14.285714 C 13.428571,44.857143 17.657143,52 19.142857,52 h 25.714286 c 1.485714,0 5.714286,-7.142857 5.714286,-14.285714 0,-7.142857 -2.857143,-14.285714 -2.857143,-14.285714 z" id="path16"/>
+<svg width="16" height="16" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+ <defs>
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text { color:#dedede; }</style>
+ </defs>
+ <path d="m6 0c-0.554 0-1 0.446-1 1v1h-4.5c-0.277 0-0.5 0.223-0.5 0.5s0.223 0.5 0.5 0.5h0.49805l0.54688 11.061c0.0612 1.0155 0.9062 1.9395 1.998 1.9395h7.9141c1.0919 0 1.9368-0.92386 1.998-1.9395l0.54688-11.061h0.49805c0.277 0 0.5-0.223 0.5-0.5s-0.223-0.5-0.5-0.5h-4.5v-1c0-0.554-0.446-1-1-1h-3zm0 1h3v1h-3v-1zm-1.5 4c0.277 0 0.5 0.223 0.5 0.5v7c0 0.277-0.223 0.5-0.5 0.5s-0.5-0.223-0.5-0.5v-7c0-0.277 0.223-0.5 0.5-0.5zm3 0c0.277 0 0.5 0.223 0.5 0.5v7c0 0.277-0.223 0.5-0.5 0.5s-0.5-0.223-0.5-0.5v-7c0-0.277 0.223-0.5 0.5-0.5zm3 0c0.277 0 0.5 0.223 0.5 0.5v7c0 0.277-0.223 0.5-0.5 0.5s-0.5-0.223-0.5-0.5v-7c0-0.277 0.223-0.5 0.5-0.5z" style="fill:currentColor" class="ColorScheme-Text"/>
 </svg>

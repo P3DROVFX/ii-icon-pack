@@ -43,6 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CRAFT_DIR = REPO_ROOT / "sources" / "craft"
 DEFAULT_AUTO_DIR = REPO_ROOT / "sources" / "auto"
 DEFAULT_YAMIS_DIR = Path(os.path.expanduser("~/.local/share/icons/YAMIS"))
+DEFAULT_MACTAHOE_DIR = Path(os.path.expanduser("~/.local/share/icons/MacTahoe-dark"))
 DEFAULT_PAPIRUS_DIR = Path("/usr/share/icons/Papirus/64x64/apps")
 DEFAULT_OUT_DIR = REPO_ROOT / "OneYou"
 
@@ -153,10 +154,70 @@ def convert_yamis_app_svg(svg_path: Path) -> str:
     return wrap_in_plate(body.strip(), f"translate({tx:.2f}, {ty:.2f}) scale({scale:.4f})")
 
 
-def convert_yamis_ui_svg(svg_path: Path) -> str:
-    """Normalize non-app YAMIS SVGs (places, actions, status, etc.) to use GLYPH_HEX."""
-    raw = svg_path.read_text(encoding="utf-8", errors="ignore")
-    return re.sub(r"#d8dee9|#eceff4|#e5e9f0", GLYPH_HEX, raw, flags=re.I)
+def normalize_mactahoe_svg(svg_text: str, is_scalable: bool) -> str:
+    """Ensure every SVG has a viewBox and upgrade scalable SVGs to 256x256 intrinsic size."""
+    m = re.search(r"<svg\b[^>]*>", svg_text, flags=re.S)
+    if not m:
+        return svg_text
+    tag = m.group(0)
+    wm = re.search(r'\bwidth\s*=\s*["\']([\d.]+)(?:px)?["\']', tag)
+    hm = re.search(r'\bheight\s*=\s*["\']([\d.]+)(?:px)?["\']', tag)
+    if "viewBox=" not in tag and "viewbox=" not in tag and wm and hm:
+        w, h = wm.group(1), hm.group(1)
+        tag = tag[:-1] + f' viewBox="0 0 {w} {h}">'
+    if is_scalable and ("viewBox=" in tag or "viewbox=" in tag):
+        tag = re.sub(r'\bwidth\s*=\s*["\'][\d.]+(?:px)?["\']', 'width="256"', tag)
+        tag = re.sub(r'\bheight\s*=\s*["\'][\d.]+(?:px)?["\']', 'height="256"', tag)
+    return svg_text[: m.start()] + tag + svg_text[m.end() :]
+
+
+def copy_mactahoe_non_app_icons(out_dir: Path, mactahoe_dir: Path):
+    """Copy non-app categories (places, mimes, actions, devices, status, etc.) from MacTahoe-dark."""
+    if not mactahoe_dir.is_dir():
+        return
+    non_app_cats = (
+        "actions", "animations", "categories", "devices",
+        "emblems", "emotes", "mimes", "places", "status",
+    )
+    for cat in non_app_cats:
+        src_cat = mactahoe_dir / cat
+        if not src_cat.is_dir():
+            continue
+        for sub_entry in sorted(os.listdir(src_cat)):
+            src_sub = src_cat / sub_entry
+            if not src_sub.is_dir():
+                continue
+            dst_sub = out_dir / cat / sub_entry
+            dst_sub.mkdir(parents=True, exist_ok=True)
+            is_scal = sub_entry == "scalable"
+            for fname in os.listdir(src_sub):
+                sp = src_sub / fname
+                dp = dst_sub / fname
+                if sp.is_symlink():
+                    safe_symlink(os.readlink(sp), dp)
+                elif sp.is_file() and fname.endswith(".svg"):
+                    raw = sp.read_text(encoding="utf-8", errors="ignore")
+                    dp.write_text(normalize_mactahoe_svg(raw, is_scal), encoding="utf-8")
+                elif sp.is_file():
+                    shutil.copy2(sp, dp)
+        safe_symlink(cat, out_dir / f"{cat}@2x")
+
+    # Also copy apps/symbolic for GTK symbolic requests
+    src_app_sym = mactahoe_dir / "apps" / "symbolic"
+    if src_app_sym.is_dir():
+        dst_app_sym = out_dir / "apps" / "symbolic"
+        dst_app_sym.mkdir(parents=True, exist_ok=True)
+        for fname in os.listdir(src_app_sym):
+            sp = src_app_sym / fname
+            dp = dst_app_sym / fname
+            if sp.is_symlink():
+                safe_symlink(os.readlink(sp), dp)
+            elif sp.is_file() and fname.endswith(".svg"):
+                raw = sp.read_text(encoding="utf-8", errors="ignore")
+                dp.write_text(normalize_mactahoe_svg(raw, False), encoding="utf-8")
+    safe_symlink("apps", out_dir / "apps@2x")
+    safe_symlink("preferences", out_dir / "preferences@2x")
+    safe_symlink("mimes", out_dir / "mimetypes")
 
 
 def convert_lawnicon_svg(svg_path: Path) -> str:
@@ -509,21 +570,8 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
                     register(entry.name)
                     counts["symlinks"] += 1
 
-    # Copy non-app YAMIS folders (places, status, actions, devices, categories, mimetypes, emblems)
-    for sub in ("actions/16", "actions/scalable", "categories/scalable", "devices/scalable",
-                "emblems/scalable", "places/16", "places/scalable", "mimetypes/scalable", "status/scalable"):
-        src_sub = yamis_dir / sub
-        if not src_sub.is_dir():
-            continue
-        dst_sub = out_dir / sub
-        dst_sub.mkdir(parents=True, exist_ok=True)
-        for entry in os.listdir(src_sub):
-            sp = src_sub / entry
-            dp = dst_sub / entry
-            if sp.is_symlink():
-                safe_symlink(os.readlink(sp), dp)
-            elif sp.is_file() and entry.endswith(".svg"):
-                dp.write_text(convert_yamis_ui_svg(sp), encoding="utf-8")
+    # Copy non-app categories (places, mimes, actions, devices, status, etc.) from MacTahoe-dark
+    copy_mactahoe_non_app_icons(out_dir, DEFAULT_MACTAHOE_DIR)
 
     # ── Priority 3: Lawnicons (10,200+ Android 16 icons) ─────────────────────
     if lawn_dir and (lawn_dir / "svgs").is_dir():
@@ -701,45 +749,95 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
 
 
 def _write_index_theme(out_dir: Path):
-    subdirs = []
-    for sub in ("apps/scalable", "preferences/scalable", "places/scalable", "places/16",
-                "actions/16", "actions/scalable", "categories/scalable", "devices/scalable",
-                "emblems/scalable", "mimetypes/scalable", "status/scalable"):
-        if (out_dir / sub).is_dir():
-            subdirs.append(sub)
+    candidate_dirs = [
+        "apps/scalable", "apps/symbolic", "preferences/scalable",
+        "places/scalable", "places/symbolic", "places/16", "places/22", "places/24",
+        "mimes/scalable", "mimes/symbolic", "mimes/16", "mimes/22", "mimes/24",
+        "actions/32", "actions/symbolic", "actions/16", "actions/22", "actions/24",
+        "devices/scalable", "devices/32", "devices/symbolic", "devices/16", "devices/22", "devices/24",
+        "categories/32", "categories/symbolic", "categories/22",
+        "status/32", "status/symbolic", "status/16", "status/22", "status/24",
+        "emblems/22", "emblems/symbolic", "emblems/16", "emblems/24",
+        "emotes/22", "emotes/symbolic",
+        "animations/16", "animations/22", "animations/24",
+    ]
+    subdirs = [sub for sub in candidate_dirs if (out_dir / sub).is_dir()]
+    scaled_dirs = [f"{sub.split('/')[0]}@2x/{sub.split('/')[1]}" for sub in subdirs]
 
     ctx_map = {
         "apps": "Applications",
         "preferences": "Applications",
         "places": "Places",
+        "mimes": "MimeTypes",
         "actions": "Actions",
         "categories": "Categories",
         "devices": "Devices",
         "emblems": "Emblems",
-        "mimetypes": "MimeTypes",
+        "emotes": "Emotes",
         "status": "Status",
+        "animations": "Animations",
     }
 
     lines = [
         "[Icon Theme]",
         "Name=OneYou",
-        "Comment=Material You / Android 16 Monochrome Icon Pack (Craft + YAMIS + Lawnicons)",
-        "Inherits=YAMIS,Papirus-Dark,breeze-dark,Adwaita,hicolor",
+        "Comment=Material You / Android 16 Monochrome Icon Pack (Craft + YAMIS + Lawnicons + MacTahoe)",
+        "Inherits=MacTahoe-dark,MacTahoe,breeze-dark,Adwaita,hicolor",
         "DisplayDepth=32",
+        "LinkOverlay=link_overlay",
+        "LockOverlay=lock_overlay",
+        "ZipOverlay=zip_overlay",
+        "DesktopDefault=48",
+        "DesktopSizes=16,22,32,48,64,96,128,256",
+        "ToolbarDefault=22",
+        "ToolbarSizes=16,22,32,48",
+        "MainToolbarDefault=22",
+        "MainToolbarSizes=16,22,32,48",
+        "SmallDefault=16",
+        "SmallSizes=16,22,32,48",
+        "PanelDefault=48",
+        "PanelSizes=16,22,32,48,64,96,128,256",
+        "DialogDefault=32",
+        "DialogSizes=16,22,32,48,64,128,256",
         "FollowsColorScheme=true",
         "Example=folder",
         f"Directories={','.join(subdirs)}",
+        f"ScaledDirectories={','.join(scaled_dirs)}",
         "",
     ]
-    for sub in subdirs:
-        cat = sub.split("/")[0]
-        context = ctx_map.get(cat, "Applications")
-        if sub.endswith("/16"):
-            lines += [f"[{sub}]", f"Context={context}", "Size=24", "MinSize=8", "MaxSize=28", "Type=Scalable", ""]
+
+    def section_block(sub: str, scale: int = 1) -> list[str]:
+        cat, sz_part = sub.split("/")
+        base_cat = cat.split("@")[0]
+        context = ctx_map.get(base_cat, "Applications")
+        blk = [f"[{sub}]", f"Context={context}"]
+        if scale > 1:
+            blk.append(f"Scale={scale}")
+        if sz_part == "scalable":
+            min_sz = "24" if base_cat in ("places", "mimes", "devices") else "16"
+            blk += ["Size=64", f"MinSize={min_sz}", "MaxSize=512", "Type=Scalable"]
+        elif sz_part == "symbolic":
+            max_sz = "96" if base_cat == "emblems" else "512"
+            blk += ["Size=16", "MinSize=16", f"MaxSize={max_sz}", "Type=Scalable"]
+        elif sz_part == "32":
+            blk += ["Size=32", "MinSize=32", "MaxSize=256", "Type=Scalable"]
+        elif base_cat == "emblems" and sz_part == "22":
+            blk += ["Size=22", "MinSize=16", "MaxSize=96", "Type=Scalable"]
         else:
-            lines += [f"[{sub}]", f"Context={context}", "Size=64", "MinSize=16", "MaxSize=512", "Type=Scalable", ""]
+            blk += [f"Size={sz_part}", "Type=Fixed"]
+        blk.append("")
+        return blk
+
+    for sub in subdirs:
+        lines += section_block(sub, scale=1)
+    for sub in scaled_dirs:
+        lines += section_block(sub, scale=2)
 
     (out_dir / "index.theme").write_text("\n".join(lines), encoding="utf-8")
+    if shutil.which("gtk4-update-icon-cache"):
+        subprocess.run(["gtk4-update-icon-cache", "-f", "-q", "-t", str(out_dir)], capture_output=True)
+    if shutil.which("gtk-update-icon-cache"):
+        subprocess.run(["gtk-update-icon-cache", "-f", "-q", "-t", str(out_dir)], capture_output=True)
 
 
 if __name__ == "__main__":

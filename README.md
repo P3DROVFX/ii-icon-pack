@@ -7,10 +7,11 @@ A Material You / Android 16 monochrome circular icon pack for Linux desktops, de
 `OneYou` combines multiple open-source icon sets using a strict priority pipeline (`scripts/build_theme.py`):
 
 1. **Priority 1 — Craft App Suite (Woodcut Bicolor):** All 14 Storyteller `*Craft` applications (`ArtCraft Launcher`, `PhotoCraft`, `LightCraft`, `FigCraft`, `PdfCraft`, `VectorCraft`, `FilmCraft`, `EffectCraft`, `DesignCraft`, `WordCraft`, `DeckCraft`, `GridCraft`, `CADCraft`, `SoundCraft`) rendered in bicolor woodcut engraving style.
-2. **Priority 2 — YAMIS (Filled Silhouettes):** Desktop Linux applications, system preferences, folders, and status icons from *Yet Another Monochrome Icon Set*, using filled monochrome glyphs inside a uniform circular container.
+2. **Priority 2 — YAMIS (Filled Silhouettes):** Desktop Linux applications and system preferences from *Yet Another Monochrome Icon Set*, using filled monochrome glyphs inside a uniform circular container.
 3. **Priority 3 — Lawnicons (Android 16):** Over 10,000 vector icons from Lawnicons to cover remaining applications, web apps, and games.
 4. **Priority 4 — Linux Freedesktop & `.desktop` Aliases:** Over 21,000 symlink aliases covering Flatpak, Snap, AppImage, Steam, JetBrains IDEs, Qt tools, Waydroid, and standard `.desktop` `Icon=` / `Name=` / `StartupWMClass=` metadata.
 5. **Priority 5 — Auto-Silhouette Extractor (`sources/auto`):** Automatically strips non-circular background plates (squares, squircles, cut-corner Qt tiles like `org.quickshell`, two-tone diagonal plates like `linguist-qt6`, `otd`, `awcc`, etc.) from any remaining unmapped system icons and vectorizes their foreground logo into a clean monochrome circular `OneYou` icon.
+6. **Non-Application Icons — MacTahoe (`places`, `mimes`, `actions`, `devices`, `status`):** Folders, file types, devices, and UI symbolic icons use the high-resolution `MacTahoe-dark` design (with folders dynamically tinted by Material You and file types preserving their rich native document colors).
 
 ---
 

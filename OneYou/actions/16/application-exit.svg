@@ -1,59 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   version="1.1"
-   viewBox="0 0 64 64"
-   id="svg1"
-   sodipodi:docname="application-exit.svg"
-   width="64"
-   height="64"
-   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#9c4444"
-     bordercolor="#eeeeee"
-     borderopacity="1"
-     inkscape:showpageshadow="0"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#ffffff"
-     inkscape:zoom="18.25"
-     inkscape:cx="49.452055"
-     inkscape:cy="20.109589"
-     inkscape:window-width="2560"
-     inkscape:window-height="1388"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg1"
-     showgrid="true">
-    <inkscape:grid
-       id="grid2"
-       units="px"
-       originx="0"
-       originy="0"
-       spacingx="1"
-       spacingy="1"
-       empcolor="#0099e5"
-       empopacity="0.30196078"
-       color="#0099e5"
-       opacity="0.14902"
-       empspacing="5"
-       enabled="true"
-       visible="true" />
-  </sodipodi:namedview>
-  <defs
-     id="defs1">
-    <style
-       type="text/css"
-       id="current-color-scheme">.ColorScheme-Text { color: #7dd3fc; } </style>
-  </defs>
-  <path
-     id="path2"
-     style="fill:currentColor"
-     d="M 12 12 L 12 52 L 52 52 L 52 12 L 12 12 z M 13.666016 22 L 50.333984 22 L 50.333984 50.333984 L 13.666016 50.333984 L 13.666016 22 z M 25.333984 33.666016 L 25.333984 38.666016 L 38.666016 38.666016 L 38.666016 33.666016 L 25.333984 33.666016 z "
-     class="ColorScheme-Text" />
+<svg version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <style id="current-color-scheme" type="text/css">.ColorScheme-Text {
+        color:#dedede;
+      }
+      .ColorScheme-NegativeText {
+        color:#da4453;
+      }</style>
+ </defs>
+ <path class="ColorScheme-NegativeText" d="m3 1c-1.108 0-2 0.892-2 2v10c0 1.108 0.892 2 2 2h10c1.108 0 2-0.892 2-2v-10c0-1.108-0.892-2-2-2zm0 3h10c0.554 0 1 0.446 1 1v8c0 0.554-0.446 1-1 1h-10c-0.554 0-1-0.446-1-1v-8c0-0.554 0.446-1 1-1z" fill="currentColor"/>
+ <path class="ColorScheme-NegativeText" d="m6 8h4c0.554 0 1 0.446 1 1s-0.446 1-1 1h-4c-0.554 0-1-0.446-1-1s0.446-1 1-1z" fill="currentColor"/>
 </svg>
