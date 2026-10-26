@@ -2,9 +2,11 @@
 """
 ii-icon-pack Icon Theme Builder
 =========================
-Builds a Material You / Android 16 style monochrome circular icon pack for Linux
-using a strict 5-stage priority pipeline:
+Builds a Material You / Android 16 style monochrome icon pack for Linux using a strict
+5-stage priority pipeline. Icons are drawn on a circular plate and can be reshaped to a
+squircle or any Material 3 Expressive shape with `--shape` (see `iishape.py`):
 
+  Priority 0: Custom overrides (`sources/custom/*.svg`) — hand-drawn icons already in the plate format
   Priority 1: Craft App Suite (`sources/craft/*.svg`) — Bicolor Woodcut / Engraving style
   Priority 2: YAMIS (`~/.local/share/icons/YAMIS`)    — Filled monochrome silhouettes (apps + preferences)
   Priority 3: Lawnicons (`svgs/*.svg` + `appfilter.xml`) — 10,200+ Android 16 icons for remaining apps
@@ -25,6 +27,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -33,13 +36,16 @@ import cv2
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import iishape  # noqa: E402
+
 # Calibrated Material You base tones for Quickshell `ii` (`recolor_icons.py`):
 # - PLATE_HEX has L* ~ 15 (dark container -> mapped to ToneMap.PLATE_TONE = 30.0)
 # - GLYPH_HEX has L* ~ 82, Chroma > 35 (bright chromatic -> mapped to ToneMap.y_hi = 92.0, weight = 1.0)
-PLATE_HEX = "#1a2636"
-GLYPH_HEX = "#7dd3fc"
+from iishape import GLYPH_HEX, PLATE_HEX
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CUSTOM_DIR = REPO_ROOT / "sources" / "custom"
 DEFAULT_CRAFT_DIR = REPO_ROOT / "sources" / "craft"
 DEFAULT_AUTO_DIR = REPO_ROOT / "sources" / "auto"
 DEFAULT_YAMIS_DIR = Path(os.path.expanduser("~/.local/share/icons/YAMIS"))
@@ -484,7 +490,8 @@ def _find_system_icon_sources() -> list[tuple[str, str]]:
     return out
 
 
-def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_dir: Path | None, papirus_dir: Path):
+def build(out_dir: Path, custom_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_dir: Path | None, papirus_dir: Path,
+          shape: str = iishape.DEFAULT_SHAPE, plate_scale: float = 1.0, glyph_scale: float = 1.0):
     if out_dir.exists():
         shutil.rmtree(out_dir)
     apps_out = out_dir / "apps" / "scalable"
@@ -495,7 +502,7 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
 
     written_lower = {}  # lower_stem -> actual filename (e.g. "firefox.svg")
     written_exact = set()  # exact stem (case-sensitive)
-    counts = {"craft": 0, "yamis": 0, "lawnicons": 0, "auto": 0, "symlinks": 0}
+    counts = {"custom": 0, "craft": 0, "yamis": 0, "lawnicons": 0, "auto": 0, "symlinks": 0}
 
     def register(fname: str):
         stem = fname[:-4]
@@ -507,6 +514,15 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
             if safe_symlink(fname, apps_out / f"{low}.svg"):
                 written_exact.add(low)
                 counts["symlinks"] += 1
+
+    # ── Priority 0: Custom overrides (hand-drawn, already 192x192 plate icons) ─
+    # Drawn on the r=88 circle plate with PLATE_HEX/GLYPH_HEX (tints of GLYPH_HEX go through
+    # opacity, never mixed colours), so reshaping and `--plate-color/--glyph-color` cover them.
+    if custom_dir.is_dir():
+        for src in sorted(custom_dir.glob("*.svg")):
+            shutil.copy2(src, apps_out / src.name)
+            register(src.name)
+            counts["custom"] += 1
 
     # ── Priority 1: Storyteller *Craft Suite (Woodcut Bicolor) ───────────────
     if craft_dir.is_dir():
@@ -735,16 +751,29 @@ def build(out_dir: Path, craft_dir: Path, auto_dir: Path, yamis_dir: Path, lawn_
             register_auto_aliases(dst_name)
             counts["auto"] += 1
 
+    # ── Plate shape: every icon above is drawn on the r=88 circle; reshape them in one pass ──
+    if shape != iishape.DEFAULT_SHAPE or plate_scale != 1.0 or glyph_scale != 1.0:
+        plate_d = iishape.plate_path(shape, plate_scale)
+        for folder in (apps_out, prefs_out):
+            for entry in folder.iterdir():
+                if entry.suffix == ".svg" and not entry.is_symlink():
+                    text = entry.read_text(encoding="utf-8", errors="ignore")
+                    out = iishape.reshape_svg(text, shape, plate_scale, glyph_scale, plate_d=plate_d)
+                    if out is not text:
+                        entry.write_text(out, encoding="utf-8")
+
     _write_index_theme(out_dir)
 
     print(
         f"Built ii-icon-pack theme at {out_dir}:\n"
+        f"  Priority 0 (Custom)          : {counts['custom']} icons\n"
         f"  Priority 1 (*Craft Woodcut)  : {counts['craft']} icons\n"
         f"  Priority 2 (YAMIS Filled)    : {counts['yamis']} icons\n"
         f"  Priority 3 (Lawnicons)       : {counts['lawnicons']} icons\n"
         f"  Priority 4 (Linux Symlinks)  : {counts['symlinks']} aliases\n"
         f"  Priority 5 (Auto-Silhouette) : {counts['auto']} extracted icons\n"
-        f"  Total app entries            : {sum(counts.values())}"
+        f"  Total app entries            : {sum(counts.values())}\n"
+        f"  Plate shape                  : {shape}"
     )
 
 
@@ -843,12 +872,18 @@ def _write_index_theme(out_dir: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build the ii-icon-pack Material You icon theme.")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_DIR, help="Output theme directory")
+    parser.add_argument("--custom-dir", type=Path, default=DEFAULT_CUSTOM_DIR, help="Directory with hand-drawn override SVGs")
     parser.add_argument("--craft-dir", type=Path, default=DEFAULT_CRAFT_DIR, help="Directory with *Craft SVGs")
     parser.add_argument("--auto-dir", type=Path, default=DEFAULT_AUTO_DIR, help="Directory for auto-extracted SVGs")
     parser.add_argument("--yamis-dir", type=Path, default=DEFAULT_YAMIS_DIR, help="Path to YAMIS icon theme")
     parser.add_argument("--lawnicons-dir", type=Path, default=None, help="Path to Lawnicons repo (cloned on demand if omitted)")
     parser.add_argument("--papirus-dir", type=Path, default=DEFAULT_PAPIRUS_DIR, help="Path to Papirus 64x64/apps for Linux aliases")
+    parser.add_argument("--shape", default=iishape.DEFAULT_SHAPE,
+                        help=f"Plate shape: {', '.join(iishape.SHAPES)} (default: circle)")
+    parser.add_argument("--plate-scale", type=float, default=1.0, help="Icon size inside its canvas (1 = r=88 plate)")
+    parser.add_argument("--glyph-scale", type=float, default=1.0, help="Logo size on the plate (1 = shape default)")
     args = parser.parse_args()
+    args.shape = iishape.normalize_shape(args.shape)
 
     lawn_path = args.lawnicons_dir
     tmp_lawn = None
@@ -864,7 +899,8 @@ if __name__ == "__main__":
         lawn_path = Path(tmp_lawn)
 
     try:
-        build(args.out, args.craft_dir, args.auto_dir, args.yamis_dir, lawn_path, args.papirus_dir)
+        build(args.out, args.custom_dir, args.craft_dir, args.auto_dir, args.yamis_dir, lawn_path, args.papirus_dir,
+              args.shape, args.plate_scale, args.glyph_scale)
     finally:
         if tmp_lawn and os.path.isdir(tmp_lawn):
             shutil.rmtree(tmp_lawn, ignore_errors=True)
